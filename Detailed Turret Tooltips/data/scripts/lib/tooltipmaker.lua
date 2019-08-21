@@ -1,12 +1,13 @@
 -- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70
--- v1
+-- v2
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
-require ("utility")
-require ("stringutility")
-require ("cargotransportlicenseutility")
-require ("inventoryitemprice")
+include ("utility")
+include ("randomext")
+include ("stringutility")
+if replaceFactionNames==nil then include ("cargotransportlicenseutility") end -- removed in 0.26
+include ("inventoryitemprice")
 
 local next, ceil = next, math.ceil
 
@@ -668,7 +669,6 @@ local function fillDescriptions(obj, tooltip, isFighter)
 	end
 
     if obj.flavorText ~= "" or not nil then
-        print(obj.flavorText)
 		local line = TooltipLine(descriptionLineHeight, descriptionFontSize)
 		line.ltext = obj.flavorText
 		line.lcolor = ColorRGB(1.0, 0.7, 0.7)
@@ -717,13 +717,13 @@ local function fillDescriptions(obj, tooltip, isFighter)
     end
     if obj.stoneRefinedEfficiency > 0 then
         local line = TooltipLine(lineHeight, fontSize-2)
-        line.ltext = "Refines Stone into Resources"
+        line.ltext = "Refinement: Refines Stone into Resources"
         line.litalic = true
         tooltip:addLine(line)
     end
     if obj.metalRefinedEfficiency > 0 then
         local line = TooltipLine(lineHeight, fontSize-2)
-        line.ltext = "Refines Alloys into Resources"
+        line.ltext = "Refinement: Refines Alloys into Resources"
         line.litalic = true
         tooltip:addLine(line)
     end
@@ -883,6 +883,7 @@ function makeTurretTooltip(turret)
 
 	fillDescriptions(turret, tooltip, false)
 
+	if replaceFactionNames~=nil then replaceFactionNames(tooltip) end
 	return tooltip
 end
 
@@ -984,6 +985,7 @@ function makeFighterTooltip(fighter)
 
 	fillDescriptions(fighter, tooltip, true)
 
+	if replaceFactionNames~=nil then replaceFactionNames(tooltip) end
 	return tooltip
 end
 
@@ -1141,7 +1143,7 @@ function makeTorpedoTooltip(torpedo)
         tooltip:addLine(TooltipLine(15, 15))
     end
 
-
+	if replaceFactionNames~=nil then replaceFactionNames(tooltip) end
     return tooltip
 
 end
