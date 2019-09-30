@@ -1,5 +1,5 @@
 -- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70
--- v2
+-- v2.1
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
@@ -882,6 +882,7 @@ function makeTurretTooltip(turret)
 	tooltip:addLine(TooltipLine(5, 5))
 
 	fillDescriptions(turret, tooltip, false)
+	if fillModDescriptions then fillModDescriptions(turret, tooltip) end
 
 	if replaceFactionNames~=nil then replaceFactionNames(tooltip) end
 	return tooltip
