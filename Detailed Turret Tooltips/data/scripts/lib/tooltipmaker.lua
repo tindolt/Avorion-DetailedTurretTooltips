@@ -995,7 +995,9 @@ function makeTorpedoTooltip(torpedo)
     local tooltip = Tooltip()
     tooltip.icon = torpedo.icon
 
-	fillObjectTooltipHeader(torpedo, tooltip, torpedo.name, true, "torpedo")
+	local torpedo_name = torpedo.name%_t % {warhead = torpedo.warheadClass%_t, speed = torpedo.bodyClass%_t}
+
+	fillObjectTooltipHeader(torpedo, tooltip, torpedo_name, true, "torpedo")
 
     if torpedo.hullDamage > 0 and torpedo.damageVelocityFactor == 0 then
         local line = TooltipLine(lineHeight, fontSize)
