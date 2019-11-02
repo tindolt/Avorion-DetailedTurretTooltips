@@ -1,5 +1,5 @@
--- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70
--- v2.1
+-- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70, TeaTeaKay
+-- v2.2
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
