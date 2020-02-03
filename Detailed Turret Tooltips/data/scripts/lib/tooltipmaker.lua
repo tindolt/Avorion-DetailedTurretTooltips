@@ -1,5 +1,5 @@
 -- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70, TeaTeaKay
--- v2.2
+-- v2.3
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
@@ -426,7 +426,7 @@ local function fillWeaponTooltipData(obj, tooltip, wpn, typ)
 			local line = TooltipLine(lineHeight, fontSize)
 			line.ltext = "Shield Penetration" --lyr_nt
 			line.rtext = round(wpn.shieldPenetration*100, 1).."%"
-			line.icon = "data/textures/icons/slashed-shield.png";
+			line.icon = "data/textures/icons/bordered-shield.png";
 			addLine(tooltip,line)
 		end
 		
@@ -657,7 +657,7 @@ local function fillDescriptions(obj, tooltip, isFighter)
 		additional[#additional+1] = {
 			ltext = "Ionized Projectiles", --lyr_nt
 			lcolor = ColorRGB(0.0, 0.6, 1.0),
-			icon = "data/textures/icons/slashed-shield.png",
+			icon = "data/textures/icons/bordered-shield.png",
 			iconColor = iconColor
 		}; extraLines = extraLines + 1
 	end
