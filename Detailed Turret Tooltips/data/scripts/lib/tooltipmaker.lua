@@ -1,13 +1,13 @@
 -- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70, TeaTeaKay
--- v2.3
+-- v3
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
 include ("utility")
 include ("randomext")
 include ("stringutility")
-if replaceFactionNames==nil then include ("cargotransportlicenseutility") end -- removed in 0.26
 include ("inventoryitemprice")
+include ("damagetypeutility")
 
 local next, ceil = next, math.ceil
 
@@ -412,26 +412,67 @@ local function fillWeaponTooltipData(obj, tooltip, wpn, typ)
 	
 	addEmptyLine(tooltip)
 
-	if wpn.name == "Railgun" or wpn.shieldPenetration > 0 then
-		-- penetration
-		if wpn.name == "Railgun" then
-			local line = TooltipLine(lineHeight, fontSize)
-			line.ltext = "Hull Penetration" --lyr_nt
-			line.rtext = (wpn.blockPenetration+1).." blocks"
-			line.icon = "data/textures/icons/drill.png";
-			addLine(tooltip,line)
+	-- damage type
+    if wpn.damageType and wpn.damageType ~= DamageType.None then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Damage Type"%_t
+		line.rtext = getDamageTypeName(wpn.damageType)
+		local dmgTypeColor
+		if wpn.damageType == DamageType.Fragments then 
+			dmgTypeColor = ColorRGB(0.7, 0.5, 0.3) 
+		else
+			dmgTypeColor = getDamageTypeColor(wpn.damageType)
 		end
+		line.rcolor = dmgTypeColor
+        --line.lcolor = dmgTypeColor
+        line.icon = getDamageTypeIcon(wpn.damageType)
+        line.iconColor = iconColor
+        tooltip:addLine(line)
+
+		-- This is not necessary as we print these bonuses already
+        --local ltext, rtext
+        --if wpn.damageType == DamageType.AntiMatter then
+        --    ltext = "More damage vs /* Increased damage against Hull */"%_t
+        --    rtext = "Hull /* Increased damage against Hull */"%_t
+        --elseif wpn.damageType == DamageType.Plasma then
+        --    ltext = "More damage vs /* Increased damage against Shields */"%_t
+        --    rtext = "Shields  /* Increased damage against Shields */"%_t
+        --elseif wpn.damageType == DamageType.Fragments then
+        --    ltext = "More damage vs /* Increased damage against Fighters, Torpedoes */"%_t
+        --    rtext = "Fighters, Torpedoes /* Increased damage against Fighters, Torpedoes */"%_t
+        --elseif wpn.damageType == DamageType.Electric then
+        --    ltext = "No damage vs /* No damage to stone */"%_t
+        --    rtext = "Stone /* No damage to stone */"%_t
+		--end
 		
-		if wpn.shieldPenetration > 0 then
-			local line = TooltipLine(lineHeight, fontSize)
-			line.ltext = "Shield Penetration" --lyr_nt
-			line.rtext = round(wpn.shieldPenetration*100, 1).."%"
-			line.icon = "data/textures/icons/bordered-shield.png";
-			addLine(tooltip,line)
-		end
-		
-		addEmptyLine(tooltip)
+        --if ltext and rtext then
+        --    local line = TooltipLine(lineHeight, fontSize)
+        --    line.ltext = ltext
+        --    line.rtext = rtext
+        --    line.lcolor = getDamageTypeColor(wpn.damageType)
+        --    line.rcolor = getDamageTypeColor(wpn.damageType)
+        --    addLine(tooltip,line)
+        --end
 	end
+
+	-- penetration
+	if wpn.blockPenetration > 1 then
+		local line = TooltipLine(lineHeight, fontSize)
+		line.ltext = "Hull Penetration" --lyr_nt
+		line.rtext = (wpn.blockPenetration+1).." blocks"
+		line.icon = "data/textures/icons/drill.png";
+		addLine(tooltip,line)
+	end
+	
+	if wpn.shieldPenetration > 0 then
+		local line = TooltipLine(lineHeight, fontSize)
+		line.ltext = "Shield Penetration" --lyr_nt
+		line.rtext = round(wpn.shieldPenetration*100, 1).."%"
+		line.icon = "data/textures/icons/bordered-shield.png";
+		addLine(tooltip,line)
+	end
+	
+	addEmptyLine(tooltip)
 
 	-- weapon independent attributes
 	local line = TooltipLine(lineHeight, fontSize)
@@ -853,8 +894,9 @@ function makeTurretTooltip(turret)
 			local profession = crewman.profession
 
 			local line = TooltipLine(lineHeight, fontSize)
-			line.ltext = profession:name(amount)
-			line.rtext = round(amount)
+			line.ltext = "Crew"
+			line.rtext = profession:name(amount)
+			--line.rtext = round(amount)
 			line.icon = profession.icon;
 			line.iconColor = iconColor
 			tooltip:addLine(line)
