@@ -1,5 +1,5 @@
 -- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70, TeaTeaKay
--- v3.1
+-- v3.2
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
@@ -7,7 +7,7 @@ include ("utility")
 include ("randomext")
 include ("stringutility")
 include ("inventoryitemprice")
-include ("damagetypeutility")
+if getDamageTypeName then include ("damagetypeutility") end
 
 local next, ceil = next, math.ceil
 
@@ -419,7 +419,7 @@ local function fillWeaponTooltipData(obj, tooltip, wpn, typ)
 	addEmptyLine(tooltip)
 
 	-- damage type
-    if wpn.damageType and wpn.damageType ~= DamageType.None then
+    if getDamageTypeName and wpn.damageType and wpn.damageType ~= DamageType.None then
         local line = TooltipLine(lineHeight, fontSize)
         line.ltext = "Damage Type"%_t
 		line.rtext = getDamageTypeName(wpn.damageType)
@@ -1098,6 +1098,167 @@ function makeFighterTooltip(fighter, other)
 
 	if replaceFactionNames~=nil then replaceFactionNames(tooltip) end
 	return tooltip
+end
+
+function makeTorpedoTooltip(torpedo)
+    -- create tool tip
+    local tooltip = Tooltip()
+    tooltip.icon = torpedo.icon
+
+	local torpedo_name = torpedo.name%_t % {warhead = torpedo.warheadClass%_t, speed = torpedo.bodyClass%_t}
+
+	fillObjectTooltipHeader(torpedo, tooltip, torpedo_name, true, "torpedo")
+
+    if torpedo.hullDamage > 0 and torpedo.damageVelocityFactor == 0 then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Hull Damage"%_t
+        line.rtext = toReadableValue(round(torpedo.hullDamage), "")
+        line.icon = "data/textures/icons/screen-impact.png";
+        line.iconColor = iconColor
+        tooltip:addLine(line)
+    elseif torpedo.damageVelocityFactor > 0 then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Hull Damage"%_t
+        line.rtext = "up to ${damage}"%_t % {damage = toReadableValue(round(torpedo.maxVelocity * torpedo.damageVelocityFactor), "")}
+        line.icon = "data/textures/icons/screen-impact.png";
+        line.iconColor = iconColor
+        tooltip:addLine(line)
+    end
+
+    if torpedo.shieldDamage > 0 and torpedo.shieldDamage ~= torpedo.hullDamage then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Shield Damage"%_t
+        line.rtext = toReadableValue(round(torpedo.shieldDamage), "")
+        line.icon = "data/textures/icons/screen-impact.png";
+        line.iconColor = iconColor
+        tooltip:addLine(line)
+    end
+
+    -- empty line
+    tooltip:addLine(TooltipLine(15, 15))
+
+    -- maneuverability
+    local line = TooltipLine(lineHeight, fontSize)
+    line.ltext = "Maneuverability"%_t
+    line.rtext = round(torpedo.turningSpeed, 2)
+    line.icon = "data/textures/icons/dodge.png";
+    line.iconColor = iconColor
+    tooltip:addLine(line)
+
+    local line = TooltipLine(lineHeight, fontSize)
+    line.ltext = "Speed"%_t
+    line.rtext = round(torpedo.maxVelocity * 10.0)
+    line.icon = "data/textures/icons/speedometer.png";
+    line.iconColor = iconColor
+    tooltip:addLine(line)
+
+    if torpedo.acceleration > 0 then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Acceleration"%_t
+        line.rtext = round(torpedo.acceleration * 10.0)
+        line.icon = "data/textures/icons/acceleration.png";
+        line.iconColor = iconColor
+        tooltip:addLine(line)
+    end
+
+    local line = TooltipLine(lineHeight, fontSize)
+    line.ltext = "Range"%_t
+    line.rtext = "${range} km" % {range = round(torpedo.reach * 10 / 1000, 2)}
+    line.icon = "data/textures/icons/target-shot.png";
+    line.iconColor = iconColor
+    tooltip:addLine(line)
+
+    if torpedo.storageEnergyDrain > 0 then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Storage Energy"%_t
+        line.rtext = toReadableValue(round(torpedo.storageEnergyDrain), "W")
+        line.icon = "data/textures/icons/electric.png";
+        line.iconColor = iconColor
+        tooltip:addLine(line)
+    end
+
+    -- empty line
+    tooltip:addLine(TooltipLine(15, 15))
+
+    -- size
+    local line = TooltipLine(lineHeight, fontSize)
+    line.ltext = "Size"%_t
+    line.rtext = round(torpedo.size, 1)
+    line.icon = "data/textures/icons/missile-pod.png";
+    line.iconColor = iconColor
+    tooltip:addLine(line)
+
+    -- durability
+    local line = TooltipLine(lineHeight, fontSize)
+    line.ltext = "Durability"%_t
+    line.rtext = round(torpedo.durability)
+    line.icon = "data/textures/icons/health-normal.png";
+    line.iconColor = iconColor
+    tooltip:addLine(line)
+
+    -- empty line
+    tooltip:addLine(TooltipLine(15, 15))
+    tooltip:addLine(TooltipLine(15, 15))
+
+    -- specialties
+    local extraLines = 0
+
+    if torpedo.damageVelocityFactor > 0 then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Damage Dependent on Velocity"%_t
+        tooltip:addLine(line)
+
+        extraLines = extraLines + 1
+    end
+
+    if torpedo.shieldDeactivation then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Briefly Deactivates Shields"%_t
+        tooltip:addLine(line)
+
+        extraLines = extraLines + 1
+    end
+
+    if torpedo.energyDrain then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Drains Target's Energy"%_t
+        tooltip:addLine(line)
+
+        extraLines = extraLines + 1
+    end
+
+    if torpedo.shieldPenetration then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Penetrates Shields"%_t
+        tooltip:addLine(line)
+
+        extraLines = extraLines + 1
+    end
+
+    if torpedo.shieldAndHullDamage then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Damages Both Shield and Hull"%_t
+        tooltip:addLine(line)
+
+        extraLines = extraLines + 1
+    end
+
+    if torpedo.storageEnergyDrain > 0 then
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = "Requires Energy in Storage"%_t
+        tooltip:addLine(line)
+
+        extraLines = extraLines + 1
+    end
+
+    for i = 1, 3 - extraLines do
+        -- empty line
+        tooltip:addLine(TooltipLine(15, 15))
+    end
+
+	if replaceFactionNames~=nil then replaceFactionNames(tooltip) end
+    return tooltip
+
 end
 
 function isCivilTurret( weapon )
