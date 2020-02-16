@@ -13,6 +13,9 @@ meta =
     -- Title of your mod that will be displayed to players
     title = "Detailed Turret Tooltips",
 
+    -- Type of your mod, either "mod" or "factionpack"
+    type = "mod",
+
     -- Description of your mod that will be displayed to players
     description = "Displays more detailed turret information like hull dps and shield dps per slot.",
 
