@@ -7,7 +7,7 @@ include ("utility")
 include ("randomext")
 include ("stringutility")
 include ("inventoryitemprice")
-if getDamageTypeName then include ("damagetypeutility") end
+include ("damagetypeutility")
 
 local next, ceil = next, math.ceil
 
