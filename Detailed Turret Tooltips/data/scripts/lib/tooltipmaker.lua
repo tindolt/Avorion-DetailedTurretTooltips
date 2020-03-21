@@ -1,5 +1,5 @@
 -- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70, TeaTeaKay
--- v3.2
+-- v3.3
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
@@ -357,8 +357,8 @@ local function fillWeaponTooltipData(obj, tooltip, wpn, typ)
 			line.icon = "data/textures/icons/back-forth.png";
 			addLine(tooltip,line)
 		end
-	elseif wpn.hullRepair > 0 or wpn.shieldRepair > 0 then
-		if wpn.hullRepair > 0 then
+	elseif obj.hullRepairRate > 0 or obj.shieldRepairRate > 0 then
+		if obj.hullRepairRate > 0 then
 			-- hull repair turrets
 			local line = TooltipLine(lineHeight, fontSize)
 			if typ == "turret" and obj.slots > 0 then
@@ -375,7 +375,7 @@ local function fillWeaponTooltipData(obj, tooltip, wpn, typ)
 			addLine(tooltip,line)
 		end
 	
-		if wpn.shieldRepair > 0 then
+		if obj.shieldRepairRate > 0 then
 			-- shield Repair Turrets
 			local line = TooltipLine(lineHeight, fontSize)
 			if typ == "turret" and obj.slots > 0 then
