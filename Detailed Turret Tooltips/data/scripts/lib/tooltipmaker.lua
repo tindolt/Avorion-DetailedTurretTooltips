@@ -1,5 +1,5 @@
 -- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70, TeaTeaKay
--- v3.3
+-- v3.4
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
@@ -882,6 +882,7 @@ function makeTurretTooltip(turret, other)
 	-- title & tooltip icon
 	local title = ""
 	tooltip.icon = turret.weaponIcon
+	tooltip.price = ArmedObjectPrice(turret) * 0.25
 
 	local weapon = turret.weaponPrefix .. " /* Weapon Prefix*/"
 	weapon = weapon % _t
