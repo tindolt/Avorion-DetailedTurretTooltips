@@ -1,5 +1,5 @@
 -- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70, TeaTeaKay
--- v3.4
+-- v3.5
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
@@ -796,7 +796,7 @@ local function fillDescriptions(obj, wpn, tooltip, isFighter)
 		end
 	end
 	
-    if obj.flavorText ~= "" or not nil then
+    if obj.flavorText ~= nil and obj.flavorText ~= "" then
 		local line = TooltipLine(descriptionLineHeight, descriptionFontSize)
 		line.ltext = obj.flavorText
 		line.lcolor = ColorRGB(1.0, 0.7, 0.7)

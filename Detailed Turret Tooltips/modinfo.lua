@@ -23,8 +23,10 @@ meta =
     authors = {"lyravega", "MrMors", "MassCraxx", "Mp70"},
 
     -- Version of your mod, should be in format 1.0.0 (major.minor.patch) or 1.0 (major.minor)
-    -- This will be used to check for unmet dependencies or incompatibilities
-    version = "3.4",
+    -- This will be used to check for unmet dependencies or incompatibilities, and to check compatibility between clients and dedicated servers with mods.
+    -- If a client with an unmatching major or minor mod version wants to log into a server, login is prohibited.
+    -- Unmatching patch version still allows logging into a server. This works in both ways (server or client higher or lower version).
+    version = "3.5",
 
     -- If your mod requires dependencies, enter them here. The game will check that all dependencies given here are met.
     -- Possible attributes:
