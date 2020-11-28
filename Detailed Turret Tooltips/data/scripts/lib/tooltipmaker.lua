@@ -1,5 +1,5 @@
 -- Detailed Turret Tooltips by lyravega, .., MrMors, MassCraxx, Mp70, TeaTeaKay
--- v3.5
+-- v4
 package.path = package.path .. ";data/scripts/lib/?.lua"
 package.path = package.path .. ";data/scripts/?.lua"
 
@@ -763,21 +763,21 @@ local function fillDescriptions(obj, wpn, tooltip, isFighter)
 		-- ineffectiveness
 		if wpn and wpn.stoneDamageMultiplicator == 0 then
 			local line = TooltipLine(descriptionLineHeight, descriptionFontSize)
-    	    line.ltext = "Ineffective against Stone"
+    	    line.ltext = "No Damage to Stone"
 			table.insert(additional, line)
 			extraLines = extraLines + 1
 		end
 		
 		if wpn.shieldDamageMultiplicator == 0 then
     	    local line = TooltipLine(descriptionLineHeight, descriptionFontSize)
-    	    line.ltext = "Ineffective against Shields"
+    	    line.ltext = "No Damage to Shields"
     	    table.insert(additional, line)
 			extraLines = extraLines + 1
 		end
 		
 		if wpn.hullDamageMultiplicator == 0 then
     	    local line = TooltipLine(descriptionLineHeight, descriptionFontSize)
-    	    line.ltext = "Ineffective against Hull"
+    	    line.ltext = "No Damage to Hull"
 			table.insert(additional, line)
 			extraLines = extraLines + 1
 		end
@@ -796,13 +796,22 @@ local function fillDescriptions(obj, wpn, tooltip, isFighter)
 		end
 	end
 	
-    if obj.flavorText ~= nil and obj.flavorText ~= "" then
-		local line = TooltipLine(descriptionLineHeight, descriptionFontSize)
-		line.ltext = obj.flavorText
-		line.lcolor = ColorRGB(1.0, 0.7, 0.7)
-		tooltip:addLine(line)
-		extraLines = extraLines + 1
-	end
+    -- one line for flavor text
+    local flavorText = obj.flavorText or ""
+    if atype(flavorText) == "Format" then
+        flavorText = flavorText:translated()
+    end
+
+    if flavorText ~= "" then
+        tooltip:addLine(TooltipLine(15, 15))
+
+        local line = TooltipLine(lineHeight, fontSize)
+        line.ltext = flavorText
+        line.lcolor = ColorRGB(1.0, 0.5, 0.5)
+        tooltip:addLine(line)
+
+        extraLines = extraLines + 1
+    end
 
 	for i = 1, 4 - extraLines do
 		tooltip:addLine(TooltipLine(descriptionLineHeight, descriptionFontSize))
@@ -836,7 +845,7 @@ local function fillDescriptions(obj, wpn, tooltip, isFighter)
     end
 end
 
-local function fillObjectTooltipHeader(obj, tooltip, title, isValidObject, typ)
+local function fillObjectTooltipHeader(obj, tooltip, title, isValidObject, typ, customName)
 	local line = TooltipLine(headlineHeight, headlineFontSize)
 	line.ctext = title
 	line.ccolor = obj.rarity.color
@@ -851,7 +860,12 @@ local function fillObjectTooltipHeader(obj, tooltip, title, isValidObject, typ)
 		--line.rcolor = obj.material.color
 	else
 		line.ltext = "Tech: "..round(obj.averageTech, 1)  --lyr_nt
-		line.ctext = tostring(obj.rarity)
+		local ctext = tostring(obj.rarity)
+		if customName then
+			-- add turret type if name was customized
+			ctext = ctext.." "..obj.weaponPrefix
+		end
+		line.ctext = ctext
 		line.rtext = obj.material.name
 		line.ccolor = obj.rarity.color
 		line.rcolor = obj.material.color
@@ -879,57 +893,119 @@ function makeTurretTooltip(turret, other)
 	local tooltip = Tooltip()
 	linesAdded = 0
 
-	-- title & tooltip icon
-	local title = ""
+	-- create tooltip
 	tooltip.icon = turret.weaponIcon
 	tooltip.price = ArmedObjectPrice(turret) * 0.25
 
-	local weapon = turret.weaponPrefix .. " /* Weapon Prefix*/"
-	weapon = weapon % _t
+	-- build title
+    local title = ""
+    if turret.title then
+        title = turret.title:translated()
+    end
 
-	local tbl = {material = turret.material.name, weaponPrefix = weapon}
+	local customName = (title ~= "")
+	if not customName then
+        local weapon = turret.weaponPrefix .. " /* Weapon Prefix*/"
+        weapon = weapon % _t
 
-    if turret.stoneRefinedEfficiency > 0 or turret.metalRefinedEfficiency > 0
-        or turret.stoneRawEfficiency > 0 or turret.metalRawEfficiency > 0  then
-        if turret.numVisibleWeapons == 1 then
-            title = "${material} ${weaponPrefix} Turret"%_t % tbl
-        elseif turret.numVisibleWeapons == 2 then
-            title = "Double ${material} ${weaponPrefix} Turret"%_t % tbl
-        elseif turret.numVisibleWeapons == 3 then
-            title = "Triple ${material} ${weaponPrefix} Turret"%_t % tbl
-        elseif turret.numVisibleWeapons == 4 then
-            title = "Quad ${material} ${weaponPrefix} Turret"%_t % tbl
+        local tbl = {material = turret.material.name, weaponPrefix = weapon}
+
+        if turret.stoneRefinedEfficiency > 0 or turret.metalRefinedEfficiency > 0
+            or turret.stoneRawEfficiency > 0 or turret.metalRawEfficiency > 0  then
+
+            if turret.itemType == InventoryItemType.Turret then
+                -- turret
+                if turret.numVisibleWeapons == 1 then
+                    title = "${material} ${weaponPrefix} Turret"%_t % tbl
+                elseif turret.numVisibleWeapons == 2 then
+                    title = "Double ${material} ${weaponPrefix} Turret"%_t % tbl
+                elseif turret.numVisibleWeapons == 3 then
+                    title = "Triple ${material} ${weaponPrefix} Turret"%_t % tbl
+                elseif turret.numVisibleWeapons == 4 then
+                    title = "Quad ${material} ${weaponPrefix} Turret"%_t % tbl
+                else
+                    title = "Multi ${material} ${weaponPrefix} Turret"%_t % tbl
+                end
+
+            else
+                -- turret template
+                if turret.numVisibleWeapons == 1 then
+                    title = "${material} ${weaponPrefix} Blueprint"%_t % tbl
+                elseif turret.numVisibleWeapons == 2 then
+                    title = "Double ${material} ${weaponPrefix} Blueprint"%_t % tbl
+                elseif turret.numVisibleWeapons == 3 then
+                    title = "Triple ${material} ${weaponPrefix} Blueprint"%_t % tbl
+                elseif turret.numVisibleWeapons == 4 then
+                    title = "Quad ${material} ${weaponPrefix} Blueprint"%_t % tbl
+                else
+                    title = "Multi ${material} ${weaponPrefix} Blueprint"%_t % tbl
+                end
+            end
+
+        elseif turret.coaxial then
+            if turret.itemType == InventoryItemType.Turret then
+                -- turret
+                if turret.numVisibleWeapons == 1 then
+                    title = "Coaxial ${weaponPrefix}"%_t % tbl
+                elseif turret.numVisibleWeapons == 2 then
+                    title = "Double Coaxial ${weaponPrefix}"%_t % tbl
+                elseif turret.numVisibleWeapons == 3 then
+                    title = "Triple Coaxial ${weaponPrefix}"%_t % tbl
+                elseif turret.numVisibleWeapons == 4 then
+                    title = "Quad Coaxial ${weaponPrefix}"%_t % tbl
+                else
+                    title = "Coaxial Multi ${weaponPrefix}"%_t % tbl
+                end
+
+            else
+                -- turret template
+                if turret.numVisibleWeapons == 1 then
+                    title = "Coaxial ${weaponPrefix} Blueprint"%_t % tbl
+                elseif turret.numVisibleWeapons == 2 then
+                    title = "Double Coaxial ${weaponPrefix} Blueprint"%_t % tbl
+                elseif turret.numVisibleWeapons == 3 then
+                    title = "Triple Coaxial ${weaponPrefix} Blueprint"%_t % tbl
+                elseif turret.numVisibleWeapons == 4 then
+                    title = "Quad Coaxial ${weaponPrefix} Blueprint"%_t % tbl
+                else
+                    title = "Coaxial Multi ${weaponPrefix} Blueprint"%_t % tbl
+                end
+            end
+
         else
-            title = "Multi ${material} ${weaponPrefix} Turret"%_t % tbl
-        end
-    elseif turret.coaxial then
-        if turret.numVisibleWeapons == 1 then
-            title = "Coaxial ${weaponPrefix}"%_t % tbl
-        elseif turret.numVisibleWeapons == 2 then
-            title = "Double Coaxial ${weaponPrefix}"%_t % tbl
-        elseif turret.numVisibleWeapons == 3 then
-            title = "Triple Coaxial ${weaponPrefix}"%_t % tbl
-        elseif turret.numVisibleWeapons == 4 then
-            title = "Quad Coaxial ${weaponPrefix}"%_t % tbl
-        else
-            title = "Coaxial Multi ${weaponPrefix}"%_t % tbl
-        end
-    else
-        if turret.numVisibleWeapons == 1 then
-            title = "${weaponPrefix} Turret"%_t % tbl
-        elseif turret.numVisibleWeapons == 2 then
-            title = "Double ${weaponPrefix} Turret"%_t % tbl
-        elseif turret.numVisibleWeapons == 3 then
-            title = "Triple ${weaponPrefix} Turret"%_t % tbl
-        elseif turret.numVisibleWeapons == 4 then
-            title = "Quad ${weaponPrefix} Turret"%_t % tbl
-        else
-            title = "Multi ${weaponPrefix} Turret"%_t % tbl
+            if turret.itemType == InventoryItemType.Turret then
+                -- turret
+                if turret.numVisibleWeapons == 1 then
+                    title = "${weaponPrefix} Turret"%_t % tbl
+                elseif turret.numVisibleWeapons == 2 then
+                    title = "Double ${weaponPrefix} Turret"%_t % tbl
+                elseif turret.numVisibleWeapons == 3 then
+                    title = "Triple ${weaponPrefix} Turret"%_t % tbl
+                elseif turret.numVisibleWeapons == 4 then
+                    title = "Quad ${weaponPrefix} Turret"%_t % tbl
+                else
+                    title = "Multi ${weaponPrefix} Turret"%_t % tbl
+                end
+
+            else
+                -- turret template
+                if turret.numVisibleWeapons == 1 then
+                    title = "${weaponPrefix} Blueprint"%_t % tbl
+                elseif turret.numVisibleWeapons == 2 then
+                    title = "Double ${weaponPrefix} Blueprint"%_t % tbl
+                elseif turret.numVisibleWeapons == 3 then
+                    title = "Triple ${weaponPrefix} Blueprint"%_t % tbl
+                elseif turret.numVisibleWeapons == 4 then
+                    title = "Quad ${weaponPrefix} Blueprint"%_t % tbl
+                else
+                    title = "Multi ${weaponPrefix} Blueprint"%_t % tbl
+                end
+            end
         end
     end
 	
 	-- fill header area and weapon data /lyr
-	fillObjectTooltipHeader(turret, tooltip, title, wpn and true or false,"turret")
+	fillObjectTooltipHeader(turret, tooltip, title, wpn and true or false, "turret", customName)
 	if wpn then fillWeaponTooltipData(turret, tooltip, wpn, "turret") end
     
     -- Refinement
