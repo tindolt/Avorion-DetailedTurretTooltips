@@ -45,7 +45,7 @@ meta =
     -- },
     dependencies = {
         {id = "1821043731", min = "1.10.14", optional = true},
-        {id = "Avorion", max = "1.*"}
+        {id = "Avorion", max = "2.*"}
     },
 
     -- Set to true if the mod only has to run on the server. Clients will get notified that the mod is running on the server, but they won't download it to themselves
